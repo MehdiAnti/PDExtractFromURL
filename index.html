@@ -65,7 +65,7 @@
 
             try {
                 const path = new URL(url).pathname.split('/');
-                
+
                 if (path[1] === "u") {
                     // /u/<id> → directly extract
                     const id = path[2];
@@ -75,10 +75,18 @@
                         output.textContent = "No ID found in /u/ URL.";
                     }
                 } else if (path[1] === "l") {
-                    // /l/<id> → fetch page and extract IDs
-                    const response = await fetch(url);
+                    // /l/<id> → fetch page using CORS proxy
+                    const proxyUrl = "https://corsproxy.io/?";
+                    const fetchUrl = proxyUrl + url;
+
+                    const response = await fetch(fetchUrl);
+                    if (!response.ok) {
+                        output.textContent = `Failed to fetch: ${response.status}`;
+                        return;
+                    }
                     const text = await response.text();
 
+                    // Extract IDs from page source
                     const regex = /"id":"([a-zA-Z0-9]+)"/g;
                     let match;
                     const ids = [];
