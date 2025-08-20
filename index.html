@@ -80,10 +80,17 @@
                     const fetchUrl = proxyUrl + encodeURIComponent(url);
 
                     const response = await fetch(fetchUrl);
+
+                    // Friendly handling for blocked pages
                     if (!response.ok) {
-                        output.textContent = `Failed to fetch: ${response.status}`;
+                        if (response.status === 451) {
+                            output.textContent = "This /l/ URL is unavailable or blocked by Pixeldrain (HTTP 451). Cannot extract IDs.";
+                        } else {
+                            output.textContent = `Failed to fetch /l/ page (status ${response.status}). It may be blocked or unavailable.`;
+                        }
                         return;
                     }
+
                     const text = await response.text();
 
                     // Extract IDs from page source
@@ -97,13 +104,13 @@
                     if (ids.length > 0) {
                         output.textContent = ids.join("\n");
                     } else {
-                        output.textContent = "No IDs found on /l/ page.";
+                        output.textContent = "No IDs found on this /l/ page.";
                     }
                 } else {
                     output.textContent = "Unsupported Pixeldrain URL path!";
                 }
             } catch (err) {
-                output.textContent = "Error processing URL: " + err;
+                output.textContent = "Error processing URL. It might be blocked or unavailable.";
             }
         }
     </script>
