@@ -75,9 +75,9 @@
                         output.textContent = "No ID found in /u/ URL.";
                     }
                 } else if (path[1] === "l") {
-                    // /l/<id> → fetch page using CORS proxy
-                    const proxyUrl = "https://corsproxy.io/?";
-                    const fetchUrl = proxyUrl + url;
+                    // /l/<id> → fetch page via view-page-source.com
+                    const proxyUrl = "https://www.view-page-source.com/?url=";
+                    const fetchUrl = proxyUrl + encodeURIComponent(url);
 
                     const response = await fetch(fetchUrl);
                     if (!response.ok) {
