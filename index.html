@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pixeldrain ID Extractor</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 40px; 
+            max-width: 800px; 
+            background-color: #2b0a0a; /* dark red background */
+            color: #f5c6c6; /* light red text */
+        }
+        input { 
+            padding: 8px; 
+            font-size: 16px; 
+            width: 70%; 
+            border: 2px solid #800000; /* dark red border */
+            border-radius: 4px;
+            background-color: #4d0f0f; /* slightly lighter dark red */
+            color: #f5c6c6; 
+        }
+        button { 
+            padding: 8px 12px; 
+            font-size: 16px; 
+            margin-left: 8px; 
+            cursor: pointer; 
+            background-color: #b71c1c; /* bright red */
+            color: #fff; 
+            border: none; 
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #e53935; /* lighter red on hover */
+        }
+        pre { 
+            background: #4d0f0f; /* dark red box */ 
+            padding: 12px; 
+            border-radius: 6px; 
+            color: #ffd6d6; /* light red text inside box */
+        }
+        h1, h2 {
+            color: #ff8a80; /* light red headers */
+        }
+    </style>
+</head>
+<body>
+    <h1>Pixeldrain ID Extractor</h1>
+    <input type="text" id="urlInput" placeholder="Paste Pixeldrain URL here">
+    <button onclick="extractIDs()">Extract IDs</button>
+
+    <h2>Extracted IDs:</h2>
+    <pre id="output"></pre>
+
+    <script>
+        async function extractIDs() {
+            const url = document.getElementById("urlInput").value.trim();
+            const output = document.getElementById("output");
+            output.textContent = "Processing...";
+
+            if (!url.startsWith("https://pixeldrain.com/")) {
+                output.textContent = "Invalid URL! Only pixeldrain.com URLs allowed.";
+                return;
+            }
+
+            try {
+                const path = new URL(url).pathname.split('/');
+                
+                if (path[1] === "u") {
+                    // /u/<id> → directly extract
+                    const id = path[2];
+                    if (id) {
+                        output.textContent = id;
+                    } else {
+                        output.textContent = "No ID found in /u/ URL.";
+                    }
+                } else if (path[1] === "l") {
+                    // /l/<id> → fetch page and extract IDs
+                    const response = await fetch(url);
+                    const text = await response.text();
+
+                    const regex = /"id":"([a-zA-Z0-9]+)"/g;
+                    let match;
+                    const ids = [];
+                    while ((match = regex.exec(text)) !== null) {
+                        ids.push(match[1]);
+                    }
+
+                    if (ids.length > 0) {
+                        output.textContent = ids.join("\n");
+                    } else {
+                        output.textContent = "No IDs found on /l/ page.";
+                    }
+                } else {
+                    output.textContent = "Unsupported Pixeldrain URL path!";
+                }
+            } catch (err) {
+                output.textContent = "Error processing URL: " + err;
+            }
+        }
+    </script>
+</body>
+</html>
